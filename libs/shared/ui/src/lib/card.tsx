@@ -1,8 +1,6 @@
 // libs/shared/ui/src/lib/card.tsx
-// ─────────────────────────────────────────────────────────────────
-// ProductCard — richly styled Tailwind card with image, badge,
-// price, rating stars, and an Add-to-Cart CTA.
-// ─────────────────────────────────────────────────────────────────
+'use client';
+
 import React from 'react';
 import { Button } from './button';
 
@@ -13,30 +11,33 @@ export interface Product {
   price: number;
   originalPrice?: number;
   imageUrl: string;
-  rating: number;       // 0–5
+  rating: number;
   reviewCount: number;
-  badge?: string;       // e.g. "New", "Sale", "Hot"
+  badge?: string;
   inStock?: boolean;
 }
 
 export interface CardProps {
   product: Product;
-  /** Called when the user clicks "Add to Cart". Client zones must wrap
-   *  this card in a client boundary to wire up the handler. */
   onAddToCart?: (product: Product) => void;
+  theme?: 'deep' | 'burst' | 'star';
 }
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({ rating, theme }: { rating: number; theme?: string }) {
+  const starColor = theme === 'burst' ? 'text-burst-aurora-400' 
+                  : theme === 'star' ? 'text-star-aurora-400'
+                  : 'text-deep-cosmic-400';
+
   return (
     <div className="flex items-center gap-0.5" aria-label={`Rating: ${rating} out of 5`}>
       {Array.from({ length: 5 }).map((_, i) => {
         const filled = i < Math.floor(rating);
-        const half   = !filled && i < rating;
+        const half = !filled && i < rating;
         return (
           <svg
             key={i}
             className={`w-4 h-4 ${
-              filled ? 'text-amber-400' : half ? 'text-amber-300' : 'text-slate-200'
+              filled ? starColor : 'text-gray-600'
             }`}
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -50,39 +51,49 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export function Card({ product, onAddToCart }: CardProps) {
+export function Card({ product, onAddToCart, theme = 'deep' }: CardProps) {
   const discount =
     product.originalPrice && product.originalPrice > product.price
       ? Math.round((1 - product.price / product.originalPrice) * 100)
       : null;
 
+  const bgClass = theme === 'burst' ? 'bg-burst-void-700 border-burst-aurora-400'
+                : theme === 'star' ? 'bg-star-silver-800 border-star-aurora-400'
+                : 'bg-deep-nebula-600 border-deep-cosmic-400';
+
+  const textClass = theme === 'burst' ? 'text-burst-void-50 hover:text-burst-aurora-400'
+                  : theme === 'star' ? 'text-star-silver-50 hover:text-star-aurora-400'
+                  : 'text-deep-nebula-100 hover:text-deep-cosmic-400';
+
   return (
-    <article className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+    <article className={`group relative flex flex-col rounded-2xl border-2 ${bgClass} shadow-glow-md hover:shadow-glow-lg transition-all duration-300 overflow-hidden`}>
 
       {/* Badge */}
       {product.badge && (
-        <span className="absolute top-3 left-3 z-10 rounded-full bg-brand-600 px-2.5 py-0.5 text-xs font-bold text-white uppercase tracking-wide shadow">
+        <span className="absolute top-3 left-3 z-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-lg">
           {product.badge}
         </span>
       )}
 
       {/* Discount chip */}
       {discount && (
-        <span className="absolute top-3 right-3 z-10 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+        <span className="absolute top-3 right-3 z-10 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white shadow-lg">
           -{discount}%
         </span>
       )}
 
-      {/* Product image — cross-zone navigation uses <a>, not <Link> */}
+      {/* Product image */}
       <a
         href={`/products/${product.id}`}
-        className="block overflow-hidden bg-slate-50 aspect-square"
+        className="block overflow-hidden aspect-square group-hover:scale-110 transition-transform duration-500 relative"
         aria-label={`View ${product.name}`}
       >
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
         <img
           src={product.imageUrl}
           alt={product.name}
-          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="h-full w-full object-cover"
           loading="lazy"
         />
       </a>
@@ -90,34 +101,48 @@ export function Card({ product, onAddToCart }: CardProps) {
       {/* Card Body */}
       <div className="flex flex-col flex-1 gap-3 p-5">
 
-        {/* Name + Rating row */}
-        <div className="flex flex-col gap-1">
+        {/* Name + Rating */}
+        <div className="flex flex-col gap-2">
           <a
             href={`/products/${product.id}`}
-            className="text-base font-semibold text-slate-800 hover:text-brand-600 transition-colors line-clamp-2 leading-snug"
+            className={`text-base font-bold ${textClass} transition-colors line-clamp-2 leading-snug`}
           >
             {product.name}
           </a>
           <div className="flex items-center gap-2">
-            <StarRating rating={product.rating} />
-            <span className="text-xs text-slate-500">
+            <StarRating rating={product.rating} theme={theme} />
+            <span className={theme === 'burst' ? 'text-burst-void-300 text-xs' 
+                          : theme === 'star' ? 'text-star-silver-300 text-xs'
+                          : 'text-deep-nebula-400 text-xs'}>
               ({product.reviewCount.toLocaleString()})
             </span>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+        <p className={`text-sm line-clamp-2 leading-relaxed ${
+          theme === 'burst' ? 'text-burst-void-300'
+          : theme === 'star' ? 'text-star-silver-300'
+          : 'text-deep-nebula-400'
+        }`}>
           {product.description}
         </p>
 
-        {/* Price row */}
+        {/* Price */}
         <div className="mt-auto flex items-center gap-2">
-          <span className="text-2xl font-extrabold text-slate-900">
+          <span className={`text-2xl font-black ${
+            theme === 'burst' ? 'text-burst-plasma-500'
+            : theme === 'star' ? 'text-star-midnight-500'
+            : 'text-deep-void-500'
+          }`}>
             ${product.price.toFixed(2)}
           </span>
           {product.originalPrice && (
-            <span className="text-sm text-slate-400 line-through">
+            <span className={`text-sm line-through ${
+              theme === 'burst' ? 'text-burst-void-400'
+              : theme === 'star' ? 'text-star-silver-400'
+              : 'text-deep-nebula-500'
+            }`}>
               ${product.originalPrice.toFixed(2)}
             </span>
           )}
@@ -125,7 +150,7 @@ export function Card({ product, onAddToCart }: CardProps) {
 
         {/* Stock status */}
         {product.inStock === false && (
-          <p className="text-xs font-semibold uppercase tracking-wide text-red-500">
+          <p className="text-xs font-bold uppercase tracking-wider text-red-400">
             Out of stock
           </p>
         )}
@@ -134,15 +159,12 @@ export function Card({ product, onAddToCart }: CardProps) {
         <Button
           variant="primary"
           size="md"
+          theme={theme}
           disabled={product.inStock === false}
           onClick={() => onAddToCart?.(product)}
-          className="w-full mt-1"
+          className="w-full mt-2"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m5-9v9m4-9v9m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-          Add to Cart
+          🚀 Add to Cart
         </Button>
       </div>
     </article>

@@ -6,7 +6,7 @@ Here is the complete, production-ready project structure document in the recomme
 ---
 
 ````md
-# 🛍️ shop-monorepo
+# 🛍️ comet-crew
 
 > **Nx v21+ · Next.js 15 App Router · Multi-Zone Microfrontends · Tailwind CSS v4 · TypeScript**
 
@@ -31,7 +31,7 @@ Within-zone navigation → <Link href="..."> (soft SPA navigation)
 ## 📂 Project Structure
 
 ```text
-shop-monorepo/
+comet-crew/
 │
 │── 📁 apps/                              # Deployable Next.js zone applications
 │   │
@@ -83,7 +83,7 @@ shop-monorepo/
 │   │
 │   └── 📁 shared/                        # Cross-zone shared domain
 │       │
-│       ├── 📁 ui/                        # @shop-monorepo/shared-ui
+│       ├── 📁 ui/                        # @comet-crew/shared/ui
 │       │   ├── 📁 src/
 │       │   │   ├── 📁 lib/
 │       │   │   │   ├── button.tsx        # <Button> — variants, sizes, loading state
@@ -91,15 +91,15 @@ shop-monorepo/
 │       │   │   │   └── header.tsx        # <Header> — cross-zone nav + cart badge
 │       │   │   └── index.ts              # Barrel export for all UI components
 │       │   ├── tsconfig.json             # jsx: react-jsx, strict: true
-│       │   └── package.json              # name: @shop-monorepo/shared-ui
+│       │   └── package.json              # name: @comet-crew/shared/ui
 │       │
-│       └── 📁 state/                     # @shop-monorepo/shared-state
+│       └── 📁 state/                     # @comet-crew/shared/state
 │           ├── 📁 src/
 │           │   ├── 📁 lib/
 │           │   │   └── use-cart.ts       # useCart() hook — localStorage cart sync
 │           │   └── index.ts              # Barrel export (useCart, CartItem, CartState)
 │           ├── tsconfig.json             # strict: true
-│           └── package.json              # name: @shop-monorepo/shared-state
+│           └── package.json              # name: @comet-crew/shared/state
 │
 │── 📁 .github/
 │   └── 📁 workflows/
@@ -124,7 +124,7 @@ shop-monorepo/
 | `libs/shared/ui/src/lib/header.tsx` | Global nav — uses `<a>` for cross-zone, `<Link>` within zone |
 | `libs/shared/state/src/lib/use-cart.ts` | `localStorage` cart sync across all zones + `StorageEvent` listener |
 | `nx.json` | Marks `dev` as `continuous: true`; registers `@nx/next/plugin` for task inference |
-| `tsconfig.base.json` | Defines `@shop-monorepo/shared-ui` and `@shop-monorepo/shared-state` path aliases |
+| `tsconfig.base.json` | Defines `@comet-crew/shared/ui` and `@comet-crew/shared/state` path aliases |
 | `project.json` (root) | `dev-all` target using `nx:run-commands` + `wait-on` to enforce boot order |
 
 ---
@@ -133,19 +133,19 @@ shop-monorepo/
 
 ```
 apps/shell
-  └── @shop-monorepo/shared-ui     (Header, Button)
-  └── @shop-monorepo/shared-state  (useCart)
+  └── @comet-crew/shared/ui     (Header, Button)
+  └── @comet-crew/shared/state  (useCart)
 
 apps/products
-  └── @shop-monorepo/shared-ui     (Header, Card, Button)
-  └── @shop-monorepo/shared-state  (useCart)
+  └── @comet-crew/shared/ui     (Header, Card, Button)
+  └── @comet-crew/shared/state  (useCart)
 
 apps/checkout
-  └── @shop-monorepo/shared-ui     (Header, Button)
-  └── @shop-monorepo/shared-state  (useCart)
+  └── @comet-crew/shared/ui     (Header, Button)
+  └── @comet-crew/shared/state  (useCart)
 
 libs/shared/ui
-  └── @shop-monorepo/shared-state  (useCart — for Header cart badge)
+  └── @comet-crew/shared/state  (useCart — for Header cart badge)
 
 libs/shared/state
   └── (no internal dependencies)
@@ -167,8 +167,8 @@ libs/shared/state
 
 ```bash
 # Clone and install
-git clone https://github.com/your-org/shop-monorepo.git
-cd shop-monorepo
+git clone https://github.com/your-org/comet-crew.git
+cd comet-crew
 npm install
 ```
 
@@ -313,7 +313,7 @@ MIT © 2026 ShopZone, Inc.
 
 | Action | Command |
 |--------|---------|
-| Save as `README.md` at workspace root | `shop-monorepo/README.md` |
+| Save as `README.md` at workspace root | `comet-crew/README.md` |
 | Preview locally in VS Code | `Ctrl+Shift+V` / `Cmd+Shift+V` |
 | Auto-generate fresh tree | `tree -I "node_modules\|.next\|dist\|.git" -L 4` |
 | Render on GitHub | Push to repo — GitHub renders it automatically |

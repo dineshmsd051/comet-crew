@@ -1,58 +1,68 @@
 // libs/shared/ui/src/lib/header.tsx
-// ─────────────────────────────────────────────────────────────────
-// Cross-zone navigation Header.
-// • Uses <a> for cross-zone links (forces hard navigation / zone boot).
-// • "use client" is required because it reads cart count from
-//   localStorage via the useCart hook.
-// ─────────────────────────────────────────────────────────────────
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '@comet-crew/shared/state';
 
 export interface HeaderProps {
-  /** Active zone key, used to highlight the current nav item. */
   activeZone?: 'home' | 'products' | 'checkout';
+  theme?: 'deep' | 'burst' | 'star';
 }
 
-export function Header({ activeZone }: HeaderProps) {
+export function Header({ activeZone, theme = 'deep' }: HeaderProps) {
   const { cartCount } = useCart();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Theme-specific classes
+  const bgClass = theme === 'burst' ? 'bg-burst-void-900/80 border-burst-aurora-500'
+                : theme === 'star' ? 'bg-star-silver-900/80 border-star-aurora-500'
+                : 'bg-deep-nebula-900/80 border-deep-cosmic-400';
+
+  const textClass = theme === 'burst' ? 'text-burst-void-50'
+                  : theme === 'star' ? 'text-star-silver-50'
+                  : 'text-deep-nebula-100';
+
+  const activeNavClass = theme === 'burst' ? 'bg-burst-plasma-500/20 text-burst-plasma-400'
+                       : theme === 'star' ? 'bg-star-midnight-500/20 text-star-aurora-400'
+                       : 'bg-deep-void-500/20 text-deep-cosmic-400';
 
   const navLinks = [
-    { label: 'Home',     href: '/',          zone: 'home'     as const },
-    { label: 'Products', href: '/products',  zone: 'products' as const },
+    { label: 'Home', href: '/', zone: 'home' as const },
+    { label: 'Products', href: '/products', zone: 'products' as const },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
+    <header className={`sticky top-0 z-50 w-full border-b-2 ${bgClass} backdrop-blur-xl supports-[backdrop-filter]:bg-opacity-60`}>
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-        {/* Logo — cross-zone, always hard-navigate to root */}
+        {/* Logo */}
         <a
           href="/"
-          className="flex items-center gap-2 text-xl font-extrabold text-brand-700 tracking-tight hover:text-brand-600 transition-colors"
-          aria-label="ShopZone — go to homepage"
+          className={`flex items-center gap-3 text-2xl font-black tracking-tighter ${
+            theme === 'burst' ? 'text-burst-plasma-500 hover:text-burst-aurora-400'
+            : theme === 'star' ? 'text-star-midnight-500 hover:text-star-aurora-400'
+            : 'text-deep-void-500 hover:text-deep-cosmic-400'
+          } transition-colors`}
+          aria-label="StarShirt - go to homepage"
         >
-          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M6 2a1 1 0 00-.894.553L3.382 6H2a1 1 0 000 2l1 9A2 2 0 005 19h14a2 2 0 001.995-1.851l1-9A1 1 0 0021 7h-1.382l-1.724-3.447A1 1 0 0017 3H7a1 1 0 00-1-1zm1.618 4l1-2h6.764l1 2H7.618z"/>
+          <svg className="w-8 h-8" viewBox="0 0 40 40" fill="currentColor" aria-hidden="true">
+            <path d="M20 2L25 15H38L28 22L32 35L20 28L8 35L12 22L2 15H15L20 2Z" />
           </svg>
-          ShopZone
+          <span className="hidden sm:inline">StarShirt</span>
         </a>
 
-        {/* Primary navigation */}
-        <nav aria-label="Main navigation">
+        {/* Desktop Navigation */}
+        <nav className="hidden sm:flex items-center gap-1" aria-label="Main navigation">
           <ul className="flex items-center gap-1">
             {navLinks.map(({ label, href, zone }) => (
               <li key={zone}>
-                {/* ⚠️  CROSS-ZONE: must use <a> not <Link> */}
                 <a
                   href={href}
-                  className={[
-                    'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                  className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                     activeZone === zone
-                      ? 'bg-brand-50 text-brand-700 font-semibold'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-                  ].join(' ')}
+                      ? activeNavClass
+                      : `${textClass} hover:opacity-80`
+                  }`}
                   aria-current={activeZone === zone ? 'page' : undefined}
                 >
                   {label}
@@ -62,25 +72,75 @@ export function Header({ activeZone }: HeaderProps) {
           </ul>
         </nav>
 
-        {/* Cart button — cross-zone to /checkout */}
-        <a
-          href="/checkout"
-          className="relative flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-          aria-label={`Go to checkout, ${cartCount} item${cartCount !== 1 ? 's' : ''} in cart`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m5-9v9m4-9v9m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-          Cart
-          {cartCount > 0 && (
-            <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
-              {cartCount > 99 ? '99+' : cartCount}
-            </span>
-          )}
-        </a>
+        {/* Right Actions */}
+        <div className="flex items-center gap-4">
+          {/* Cart Button */}
+          <a
+            href="/checkout"
+            className={`relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all shadow-glow-md hover:shadow-glow-lg ${
+              theme === 'burst' 
+                ? 'bg-burst-aurora-500 text-white hover:bg-burst-aurora-600'
+                : theme === 'star'
+                ? 'bg-star-aurora-500 text-white hover:bg-star-aurora-600'
+                : 'bg-deep-cosmic-500 text-white hover:bg-deep-cosmic-600'
+            }`}
+            aria-label={`Go to checkout, ${cartCount} item${cartCount !== 1 ? 's' : ''} in cart`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m5-9v9m4-9v9m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            {/* Badge */}
+            {cartCount > 0 && (
+              <span className={`absolute -top-3 -right-3 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ring-2 ring-white ${
+                theme === 'burst' ? 'bg-burst-plasma-500'
+                : theme === 'star' ? 'bg-star-midnight-500'
+                : 'bg-deep-void-500'
+              }`}>
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
+          </a>
 
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`sm:hidden p-2 rounded-lg transition-colors ${textClass} hover:opacity-70`}
+            aria-label="Toggle mobile menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <nav className={`sm:hidden border-t-2 ${
+          theme === 'burst' ? 'border-burst-aurora-500 bg-burst-void-800'
+          : theme === 'star' ? 'border-star-aurora-500 bg-star-silver-800'
+          : 'border-deep-cosmic-400 bg-deep-nebula-700'
+        }`}>
+          <ul className="flex flex-col gap-2 px-4 py-4">
+            {navLinks.map(({ label, href, zone }) => (
+              <li key={zone}>
+                <a
+                  href={href}
+                  className={`block px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    activeZone === zone
+                      ? activeNavClass
+                      : `${textClass} hover:opacity-70`
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
     </header>
   );
 }

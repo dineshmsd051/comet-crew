@@ -38,7 +38,7 @@ Shared UI components (Button, Card, Header) and cart state (via `localStorage`) 
 ## 📁 Project Structure
 
 ```
-shop-monorepo/
+comet-crew/
 ├── apps/
 │   ├── shell/         # Zone 0 · Landing page & gateway proxy  → port 3000
 │   ├── products/      # Zone 1 · Product catalog & detail       → port 3001
