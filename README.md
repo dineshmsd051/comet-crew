@@ -1,96 +1,229 @@
-# ShopMonorepo
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+```markdown
+# ☄️ Comet Club — T-Shirt Shop
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+> **Premium streetwear, delivered at the speed of light.**
 
-## Run tasks
+Comet Club is a modern e-commerce frontend for a premium T-shirt brand built as a **Next.js Multi-Zone Microfrontend** inside an **Nx Monorepo**. The application is split into three independent zones — a marketing shell, a product catalog, and a checkout flow — all unified under a single URL and powered by shared UI components and cross-zone cart state.
 
-To run tasks with Nx use:
+---
 
-```sh
-npx nx <target> <project-name>
+## 🌌 What is Comet Club?
+
+Comet Club is a streetwear brand born from the idea that bold design should feel effortless. Every drop is crafted for those who move fast, think bold, and wear their identity on their sleeve — literally.
+
+This repository contains the **complete frontend codebase** powering the Comet Club shopping experience, serving as a production-grade reference for scalable, independently deployable microfrontend systems.
+
+---
+
+## 🏗️ Architecture
+
+The application is split into three independent Next.js apps (zones), each owning a specific domain:
+
+```
+http://localhost:3000          →  Shell     (landing page, gateway)
+http://localhost:3000/products →  Products  (catalog, product detail)
+http://localhost:3000/checkout →  Checkout  (cart, order placement)
 ```
 
-For example:
+All traffic enters through the **Shell** on port `3000`. It transparently proxies `/products*` and `/checkout*` requests to their respective zone processes using Next.js `rewrites`. The browser always sees a single unified URL.
 
-```sh
-npx nx build myproject
+```
+Browser → Shell (3000) → rewrites → Products Zone (3001)
+                                 → Checkout Zone  (3002)
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+Shared UI components (Button, Card, Header) and cart state (via `localStorage`) live in `libs/` and are consumed by all three zones.
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Add new projects
+## 📁 Project Structure
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
-```sh
-npx nx add @nx/react
+```
+shop-monorepo/
+├── apps/
+│   ├── shell/         # Zone 0 · Landing page & gateway proxy  → port 3000
+│   ├── products/      # Zone 1 · Product catalog & detail       → port 3001
+│   └── checkout/      # Zone 2 · Cart review & order placement  → port 3002
+│
+├── libs/
+│   └── shared/
+│       ├── ui/        # Shared Tailwind components (Button, Card, Header)
+│       └── state/     # Cross-zone localStorage cart (useCart hook)
+│
+├── package.json       # Root scripts
+├── nx.json            # Nx workspace config
+└── tsconfig.base.json # Shared TypeScript path aliases
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
+---
 
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
+## ⚡ Tech Stack
 
-# Generate a library
-npx nx g @nx/react:lib some-lib
+| Technology | Version | Purpose |
+|---|---|---|
+| [Nx](https://nx.dev) | `^21` | Monorepo orchestration & task caching |
+| [Next.js](https://nextjs.org) | `^15` | App Router, SSR, Multi-Zone rewrites |
+| [React](https://react.dev) | `^18.3` | UI component model |
+| [TypeScript](https://www.typescriptlang.org) | `~5.5` | Strict typing across all zones |
+| [Tailwind CSS](https://tailwindcss.com) | `^4` | Utility-first CSS styling |
+
+---
+
+## 🚀 Setup & Installation
+
+### Prerequisites
+
+- **Node.js** `>= 20.x`
+- **npm** `>= 10.x`
+
+---
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-org/comet-club-shop.git
+cd comet-club-shop
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+---
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### 2. Install dependencies
 
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
+```bash
+npm install
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+---
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### 3. Create environment files
 
-### Step 2
+Each zone requires a `.env.local` file to bind to the correct port and avoid IPv6 connection errors.
 
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+**`apps/shell/.env.local`**
+```bash
+PORT=3000
+HOSTNAME=127.0.0.1
+PRODUCTS_ZONE_URL=http://127.0.0.1:3001
+CHECKOUT_ZONE_URL=http://127.0.0.1:3002
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+**`apps/products/.env.local`**
+```bash
+PORT=3001
+HOSTNAME=127.0.0.1
+```
 
-## Install Nx Console
+**`apps/checkout/.env.local`**
+```bash
+PORT=3002
+HOSTNAME=127.0.0.1
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+---
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### 4. Start the development server
 
-## Useful links
+```bash
+npm run dev
+```
 
-Learn more:
+This starts all three zones concurrently. The `products` and `checkout` zones boot first, and the `shell` starts only after both ports are confirmed ready (using `wait-on`), preventing proxy connection errors.
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Once running, open **http://localhost:3000** in your browser.
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
+
+## 🖥️ Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start all 3 zones in parallel |
+| `npm run dev:shell` | Start shell zone only |
+| `npm run dev:products` | Start products zone only |
+| `npm run dev:checkout` | Start checkout zone only |
+| `npm run build` | Build all zones for production |
+| `npm run typecheck` | TypeScript check across the monorepo |
+| `npm run lint` | Lint all projects |
+| `npm run graph` | Open Nx project dependency graph |
+| `npm run reset` | Clear Nx cache |
+
+---
+
+## 🌐 Routes
+
+| URL | Description |
+|---|---|
+| `/` | Marketing landing page with hero section and CTAs |
+| `/products` | Full product grid — browse all Comet Club T-shirts |
+| `/products/:id` | Individual product detail page |
+| `/checkout` | Cart review, quantity controls, and order placement |
+
+---
+
+## 🛒 How Cart State Works Across Zones
+
+Each zone is an independent Next.js process with no shared memory. Cart state is persisted in **`localStorage`** under the key `shop_cart` so it survives navigation between zones.
+
+```
+User adds item in /products
+        ↓
+useCart() writes to localStorage["shop_cart"]
+        ↓
+User navigates to /checkout  ← hard navigation (<a> tag)
+        ↓
+Checkout zone boots, reads localStorage["shop_cart"]
+        ↓
+Cart items appear instantly ✅
+```
+
+The `useCart` hook also subscribes to the browser's `storage` event so the cart badge in the header updates in real time without a page refresh.
+
+---
+
+## 🔗 Navigation Rules
+
+This is the most important rule in a Multi-Zone app:
+
+```tsx
+// ✅ Cross-zone → always use a plain <a> tag (forces hard navigation)
+<a href="/checkout">Go to Checkout</a>
+
+// ✅ Within the same zone → use Next.js <Link> (soft client-side navigation)
+import Link from 'next/link';
+<Link href="/products/comet-tee-001">View Product</Link>
+```
+
+Using `<Link>` across zones causes broken navigation because each zone has its own independent React and Next.js runtime.
+
+---
+
+## 🐛 Troubleshooting
+
+### `ECONNREFUSED` proxy error
+
+**Cause:** The shell tried to proxy to a zone that is not yet running or bound to a different address.
+
+**Fix:**
+1. Ensure all three zones are running (`npm run dev` starts all three)
+2. Confirm `.env.local` files exist in each app with `HOSTNAME=127.0.0.1`
+3. Use `127.0.0.1` instead of `localhost` in `apps/shell/next.config.js` rewrites — Node.js 17+ resolves `localhost` to IPv6 (`::1`) which may not match the zone's binding
+
+---
+
+### Zone not found / 404 on `/products` or `/checkout`
+
+**Cause:** The `basePath` in the zone's `next.config.js` does not match the rewrite destination in the shell.
+
+**Fix:** Ensure:
+- `apps/products/next.config.js` has `basePath: '/products'`
+- `apps/checkout/next.config.js` has `basePath: '/checkout'`
+- Shell rewrites destination paths include the basePath prefix (e.g., `http://127.0.0.1:3001/products`)
+
+---
+
+## 📄 License
+
+MIT © 2026 Comet Club. All rights reserved.
+```

@@ -1,0 +1,19 @@
+{
+  "name": "checkout",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/checkout/src",
+  "projectType": "application",
+  "targets": {
+    "dev": {
+      "options": {
+        "port": 3002
+      }
+    },
+    "build": {
+      "options": {
+        "outputPath": "dist/apps/checkout"
+      }
+    }
+  },
+  "tags": ["scope:checkout", "type:app"]
+}

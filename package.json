@@ -1,13 +1,36 @@
 {
-  "name": "@shop-monorepo/source",
-  "version": "0.0.0",
-  "license": "MIT",
-  "scripts": {},
+  "name": "comet-crew",
+  "version": "0.0.1",
   "private": true,
-  "dependencies": {},
+  "scripts": {
+    "dev": "nx run-many -t dev --projects=shell,products,checkout --parallel=3",
+    "dev:shell": "nx dev shell",
+    "dev:products": "nx dev products",
+    "dev:checkout": "nx dev checkout",
+    "build": "nx run-many -t build --projects=shell,products,checkout --parallel=3",
+    "build:affected": "nx affected -t build",
+    "build:shell": "nx build shell",
+    "build:products": "nx build products",
+    "build:checkout": "nx build checkout",
+    "start": "nx run-many -t start --projects=shell,products,checkout --parallel=3",
+    "typecheck": "tsc --build --noEmit",
+    "lint": "nx run-many -t lint --all --parallel=5",
+    "lint:affected": "nx affected -t lint",
+    "graph": "nx graph",
+    "reset": "nx reset"
+  },
   "devDependencies": {
-    "@nx/js": "23.1.0",
-    "@nx/workspace": "23.1.0",
-    "nx": "23.1.0"
+    "nx": "^21.0.0",
+    "@nx/next": "^21.0.0",
+    "@nx/js": "^21.0.0",
+    "typescript": "~5.5.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.5.0"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
   }
 }

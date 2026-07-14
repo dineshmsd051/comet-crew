@@ -1,0 +1,19 @@
+{
+  "name": "products",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/products/src",
+  "projectType": "application",
+  "targets": {
+    "dev": {
+      "options": {
+        "port": 3001
+      }
+    },
+    "build": {
+      "options": {
+        "outputPath": "dist/apps/products"
+      }
+    }
+  },
+  "tags": ["scope:products", "type:app"]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "shell",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "lint": "next lint"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17"
+  }
+}

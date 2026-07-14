@@ -1,0 +1,14 @@
+{
+  "name": "products",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "lint": "next lint"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17"
+  }
+}
