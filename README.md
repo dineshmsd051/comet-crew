@@ -1,6 +1,3 @@
-
-
-```markdown
 # ☄️ Comet Club — T-Shirt Shop
 
 > **Premium streetwear, delivered at the speed of light.**
