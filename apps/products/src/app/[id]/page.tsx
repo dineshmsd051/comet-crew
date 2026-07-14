@@ -45,7 +45,7 @@ export default function ProductDetailPage({ params }: Props) {
           </ol>
         </nav>
 
-        <ProductDetailClient productId={params.id} />
+        <ProductDetailClient product={params} />
       </main>
     </>
   );

@@ -43,12 +43,12 @@ export function Header({ activeZone, theme = 'deep' }: HeaderProps) {
             : theme === 'star' ? 'text-star-midnight-500 hover:text-star-aurora-400'
             : 'text-deep-void-500 hover:text-deep-cosmic-400'
           } transition-colors`}
-          aria-label="StarShirt - go to homepage"
+          aria-label="Comet Crew - go to homepage"
         >
           <svg className="w-8 h-8" viewBox="0 0 40 40" fill="currentColor" aria-hidden="true">
             <path d="M20 2L25 15H38L28 22L32 35L20 28L8 35L12 22L2 15H15L20 2Z" />
           </svg>
-          <span className="hidden sm:inline">StarShirt</span>
+          <span className="hidden sm:inline">Comet Crew</span>
         </a>
 
         {/* Desktop Navigation */}

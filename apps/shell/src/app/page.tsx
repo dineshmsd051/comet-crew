@@ -47,7 +47,7 @@ export default function HomePage() {
             </span>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-deep-void-500 via-deep-cosmic-400 to-deep-void-500 mb-6 leading-tight">
-              StarShirt:
+              Comet Crew:
               <br />
               Wear the
               <br />
@@ -104,7 +104,7 @@ export default function HomePage() {
         <section className="bg-deep-nebula-800/50 backdrop-blur py-20 lg:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl sm:text-5xl font-black text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-deep-void-500 to-deep-cosmic-400">
-              Why Cosmic Explorers Choose StarShirt
+              Why Cosmic Explorers Choose Comet Crew
             </h2>
             <p className="text-center text-deep-nebula-300 mb-12 text-lg">
               Designed for the modern space enthusiast
@@ -184,7 +184,7 @@ export default function HomePage() {
       <footer className="border-t border-deep-nebula-700 bg-deep-nebula-900/80 backdrop-blur py-12 text-center">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-sm text-deep-nebula-400">
-            © 2026 StarShirt, Inc. All rights reserved.
+            © 2026 Comet Crew, Inc. All rights reserved.
             &nbsp;·&nbsp;
             <a href="/products" className="hover:text-deep-cosmic-400 transition-colors">Products</a>
             &nbsp;·&nbsp;
