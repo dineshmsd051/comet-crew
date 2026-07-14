@@ -20,15 +20,11 @@ const DEMO_PRODUCTS: (Product & { category: string })[] = [
 ];
 
 export function ProductGrid() {
-  const { addItem, cartCount } = useCart();
+const { addItem, cartCount } = useCart();
   const { showToast } = useToast();
 
   const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    category: 'all',
-    priceRange: [0, 200],
-    sortBy: 'featured',
-    inStockOnly: false,
+    search: '', category: 'all', priceRange: [0, 200], sortBy: 'featured', inStockOnly: false,
   });
 
   const categories = useMemo(
@@ -38,8 +34,7 @@ export function ProductGrid() {
 
   const filteredProducts = useMemo(() => {
     let result = DEMO_PRODUCTS.filter((p) => {
-      const matchesSearch = p.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-                             p.description.toLowerCase().includes(filters.search.toLowerCase());
+      const matchesSearch = p.name.toLowerCase().includes(filters.search.toLowerCase());
       const matchesCategory = filters.category === 'all' || p.category === filters.category;
       const matchesPrice = p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1];
       const matchesStock = !filters.inStockOnly || p.inStock;
@@ -50,19 +45,14 @@ export function ProductGrid() {
       case 'price-asc': result.sort((a, b) => a.price - b.price); break;
       case 'price-desc': result.sort((a, b) => b.price - a.price); break;
       case 'rating': result.sort((a, b) => b.rating - a.rating); break;
-      case 'newest': result.reverse(); break;
     }
-
     return result;
   }, [filters]);
 
-  function handleAddToCart(product: Product) {
+  function handleAddToCart(product: typeof DEMO_PRODUCTS[0]) {
     addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      quantity: 1,
+      id: product.id, name: product.name, price: product.price,
+      imageUrl: product.imageUrl, quantity: 1,
     });
     showToast(`${product.name} added to cart! 🚀`, 'success');
   }

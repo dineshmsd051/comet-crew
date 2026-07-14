@@ -1,51 +1,38 @@
-// apps/products/src/app/[id]/page.tsx
-// ─────────────────────────────────────────────────────────────────
-// PRODUCTS ZONE — Product Detail Page
-// Within-zone navigation: "Back to products" uses Next.js <Link>
-// because we stay inside the products zone.
-// ─────────────────────────────────────────────────────────────────
-import type { Metadata } from 'next';
-import Link from 'next/link';  // ✅ WITHIN-ZONE: use <Link>
-import { Header } from '@comet-crew/shared/ui';
+import { notFound } from 'next/navigation';
+import { getProductById, DEMO_PRODUCTS } from '@comet-crew/shared/state';
 import { ProductDetailClient } from './product-detail-client';
+import { Header } from '@comet-crew/shared/ui';
 
-interface Props {
+interface ProductPageProps {
   params: { id: string };
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export function generateStaticParams() {
+  return DEMO_PRODUCTS.map((product) => ({ id: product.id }));
+}
+
+export function generateMetadata({ params }: ProductPageProps) {
+  const product = getProductById(params.id);
+  if (!product) return { title: 'Product Not Found' };
   return {
-    title: `Product ${params.id}`,
-    description: `View details for product ${params.id}`,
+    title: product.name,
+    description: product.description,
   };
 }
 
-export default function ProductDetailPage({ params }: Props) {
+export default function ProductPage({ params }: ProductPageProps) {
+  const product = getProductById(params.id);
+
+  // ✅ Critical: handle missing product BEFORE passing to client component
+  if (!product) {
+    notFound();
+  }
+
   return (
     <>
-      <Header activeZone="products" />
+      <Header activeZone="products" theme="deep" />
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-
-        {/* Breadcrumb — within-zone: use Next.js Link */}
-        <nav aria-label="Breadcrumb" className="mb-8">
-          <ol className="flex items-center gap-2 text-sm text-slate-500">
-            {/* ⚠️ Cross-zone: home is in shell zone */}
-            <li><a href="/" className="hover:text-brand-600 transition-colors">Home</a></li>
-            <li aria-hidden="true">/</li>
-            {/* ✅ Within-zone: products list is in this zone */}
-            <li>
-              <Link href="/products" className="hover:text-brand-600 transition-colors">
-                Products
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="font-medium text-slate-700" aria-current="page">
-              #{params.id}
-            </li>
-          </ol>
-        </nav>
-
-        <ProductDetailClient product={params} />
+        <ProductDetailClient product={product} />
       </main>
     </>
   );

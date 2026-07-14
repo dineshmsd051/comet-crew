@@ -3,15 +3,10 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@comet-crew/shared/ui';
 import { useCart, useWishlist, useToast } from '@comet-crew/shared/state';
-import type { Product } from '@comet-crew/shared/ui';
+import type { FullProduct } from '@comet-crew/shared/state';
 
 interface ProductDetailClientProps {
-  product: Product & {
-    images: string[];
-    sizes: string[];
-    colors: { name: string; hex: string }[];
-    stockCount: number;
-  };
+  product: FullProduct;
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
@@ -19,26 +14,32 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
 
+  // ✅ Defensive fallbacks — never assume arrays exist or have items
+  const images = product.images?.length ? product.images : [product.imageUrl];
+  const sizes = product.sizes ?? [];
+  const colors = product.colors ?? [];
+  const stockCount = product.stockCount ?? 0;
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(product.colors[0]?.name ?? null);
+  // ✅ Safe optional chaining with nullish coalescing
+  const [selectedColor, setSelectedColor] = useState<string | null>(
+    colors[0]?.name ?? null
+  );
   const [quantity, setQuantity] = useState(1);
   const [sizeError, setSizeError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
   const wishlisted = isInWishlist(product.id);
-  const maxQty = Math.min(product.stockCount, 10);
-
-  const canAddToCart = useMemo(() => {
-    return product.stockCount > 0 && selectedSize !== null;
-  }, [product.stockCount, selectedSize]);
+  const maxQty = Math.min(stockCount, 10);
 
   function handleQuantityChange(delta: number) {
-    setQuantity((prev) => Math.min(Math.max(1, prev + delta), maxQty));
+    setQuantity((prev) => Math.min(Math.max(1, prev + delta), Math.max(maxQty, 1)));
   }
 
   async function handleAddToCart() {
-    if (!selectedSize) {
+    // ✅ Only require size selection if sizes actually exist
+    if (sizes.length > 0 && !selectedSize) {
       setSizeError(true);
       showToast('Please select a size', 'warning');
       return;
@@ -46,8 +47,6 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
     setIsAdding(true);
     setSizeError(false);
-
-    // Simulate a slight delay for UX feedback
     await new Promise((r) => setTimeout(r, 400));
 
     addItem({
@@ -56,9 +55,9 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       price: product.price,
       imageUrl: product.imageUrl,
       quantity,
-      size: selectedSize,
+      size: selectedSize ?? undefined,
       color: selectedColor ?? undefined,
-      maxQuantity: product.stockCount,
+      maxQuantity: stockCount,
     });
 
     showToast(`${product.name} added to cart! 🚀`, 'success');
@@ -72,20 +71,19 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       price: product.price,
       imageUrl: product.imageUrl,
     });
-    showToast(
-      added ? `Added to wishlist ❤️` : `Removed from wishlist`,
-      added ? 'success' : 'info'
-    );
+    showToast(added ? 'Added to wishlist ❤️' : 'Removed from wishlist', added ? 'success' : 'info');
   }
 
   function handleShare() {
-    if (navigator.share) {
+    if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
         title: product.name,
         text: product.description,
         url: window.location.href,
+      }).catch(() => {
+        // User cancelled share — no-op
       });
-    } else {
+    } else if (typeof navigator !== 'undefined') {
       navigator.clipboard.writeText(window.location.href);
       showToast('Link copied to clipboard!', 'success');
     }
@@ -98,11 +96,11 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       <div className="flex flex-col gap-4">
         <div className="relative aspect-square overflow-hidden rounded-2xl border-2 border-cosmic-400/30 bg-nebula-800">
           <img
-            src={product.images[selectedImage]}
+            src={images[selectedImage] ?? images[0]}
             alt={`${product.name} - view ${selectedImage + 1}`}
             className="h-full w-full object-cover"
           />
-          {product.stockCount === 0 && (
+          {stockCount === 0 && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/60">
               <span className="rounded-full bg-red-600 px-6 py-2 text-lg font-bold text-white">
                 Out of Stock
@@ -111,24 +109,26 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           )}
         </div>
 
-        {/* Thumbnail strip */}
-        <div className="flex gap-3 overflow-x-auto pb-2">
-          {product.images.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => setSelectedImage(i)}
-              className={`relative flex-shrink-0 h-20 w-20 overflow-hidden rounded-lg border-2 transition-all ${
-                selectedImage === i
-                  ? 'border-cosmic-400 shadow-glow-sm'
-                  : 'border-nebula-600 opacity-60 hover:opacity-100'
-              }`}
-              aria-label={`View image ${i + 1}`}
-              aria-pressed={selectedImage === i}
-            >
-              <img src={img} alt="" className="h-full w-full object-cover" />
-            </button>
-          ))}
-        </div>
+        {/* ✅ Only render thumbnails if more than 1 image */}
+        {images.length > 1 && (
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {images.map((img, i) => (
+              <button
+                key={i}
+                onClick={() => setSelectedImage(i)}
+                className={`relative flex-shrink-0 h-20 w-20 overflow-hidden rounded-lg border-2 transition-all ${
+                  selectedImage === i
+                    ? 'border-cosmic-400 shadow-glow-sm'
+                    : 'border-nebula-600 opacity-60 hover:opacity-100'
+                }`}
+                aria-label={`View image ${i + 1}`}
+                aria-pressed={selectedImage === i}
+              >
+                <img src={img} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Product Info ─────────────────────────────────────────── */}
@@ -158,7 +158,6 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           </div>
         </div>
 
-        {/* Price */}
         <div className="flex items-baseline gap-3">
           <span className="text-4xl font-black text-void-500">${product.price.toFixed(2)}</span>
           {product.originalPrice && (
@@ -168,21 +167,20 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
         <p className="text-nebula-300 leading-relaxed">{product.description}</p>
 
-        {/* Stock indicator */}
-        {product.stockCount > 0 && product.stockCount <= 10 && (
+        {stockCount > 0 && stockCount <= 10 && (
           <p className="text-sm font-bold text-amber-400">
-            ⚡ Only {product.stockCount} left in cosmic inventory!
+            ⚡ Only {stockCount} left in cosmic inventory!
           </p>
         )}
 
-        {/* Color selector */}
-        {product.colors.length > 0 && (
+        {/* ✅ Only render color selector if colors exist */}
+        {colors.length > 0 && (
           <div>
             <p className="mb-2 text-sm font-bold text-nebula-200">
               Color: <span className="text-cosmic-400">{selectedColor}</span>
             </p>
             <div className="flex gap-3">
-              {product.colors.map((color) => (
+              {colors.map((color) => (
                 <button
                   key={color.name}
                   onClick={() => setSelectedColor(color.name)}
@@ -200,38 +198,40 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           </div>
         )}
 
-        {/* Size selector */}
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm font-bold text-nebula-200">
-              Size {sizeError && <span className="text-red-400">— required</span>}
-            </p>
-            <button className="text-xs text-cosmic-400 underline hover:text-cosmic-300">
-              Size Guide
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {product.sizes.map((size) => (
-              <button
-                key={size}
-                onClick={() => {
-                  setSelectedSize(size);
-                  setSizeError(false);
-                }}
-                className={`min-w-[3rem] rounded-lg border-2 px-4 py-2 text-sm font-bold transition-all ${
-                  selectedSize === size
-                    ? 'border-void-500 bg-void-500 text-white shadow-glow-sm'
-                    : sizeError
-                    ? 'border-red-500/50 text-nebula-200 hover:border-red-400'
-                    : 'border-nebula-600 text-nebula-200 hover:border-cosmic-400'
-                }`}
-                aria-pressed={selectedSize === size}
-              >
-                {size}
+        {/* ✅ Only render size selector if sizes exist */}
+        {sizes.length > 0 && (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm font-bold text-nebula-200">
+                Size {sizeError && <span className="text-red-400">— required</span>}
+              </p>
+              <button className="text-xs text-cosmic-400 underline hover:text-cosmic-300">
+                Size Guide
               </button>
-            ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => {
+                    setSelectedSize(size);
+                    setSizeError(false);
+                  }}
+                  className={`min-w-[3rem] rounded-lg border-2 px-4 py-2 text-sm font-bold transition-all ${
+                    selectedSize === size
+                      ? 'border-void-500 bg-void-500 text-white shadow-glow-sm'
+                      : sizeError
+                      ? 'border-red-500/50 text-nebula-200 hover:border-red-400'
+                      : 'border-nebula-600 text-nebula-200 hover:border-cosmic-400'
+                  }`}
+                  aria-pressed={selectedSize === size}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Quantity selector */}
         <div>
@@ -262,18 +262,17 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3 pt-2">
           <Button
             variant="primary"
             size="lg"
             theme="deep"
             isLoading={isAdding}
-            disabled={product.stockCount === 0}
+            disabled={stockCount === 0}
             onClick={handleAddToCart}
             className="flex-1"
           >
-            {product.stockCount === 0 ? 'Out of Stock' : '🚀 Add to Cart'}
+            {stockCount === 0 ? 'Out of Stock' : '🚀 Add to Cart'}
           </Button>
           <Button variant="ghost" size="lg" theme="deep" onClick={handleShare} aria-label="Share product">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,7 +282,6 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           </Button>
         </div>
 
-        {/* Trust badges */}
         <div className="grid grid-cols-3 gap-3 border-t border-nebula-700 pt-6 text-center">
           <div>
             <span className="text-2xl">🚀</span>
