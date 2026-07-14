@@ -2,7 +2,7 @@ const { composePlugins, withNx } = require('@nx/next');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@comet-crew/shared-ui', '@comet-crew/shared-state'],
+  transpilePackages: ['@comet-crew/shared/ui', '@comet-crew/shared/state'],
 
   async rewrites() {
     // ✅ Use 127.0.0.1 (IPv4) — NOT localhost
